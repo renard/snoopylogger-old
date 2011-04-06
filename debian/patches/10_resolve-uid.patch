@@ -1,0 +1,31 @@
+diff --git a/snoopy.c b/snoopy.c
+index c2f6759..e74ed79 100644
+--- a/snoopy.c
++++ b/snoopy.c
+@@ -49,6 +49,7 @@ static inline void snoopy_log(const char *filename, char *const argv[])
+ 	char    cwd[PATH_MAX+1];
+ 	char   *getCwdRet           = NULL;
+ 	char   *logMessage          = NULL;
++	char    login[256];
+ 	int     logMessageMaxSize   = 0;
+ 
+ 	char   *ttyPath         = NULL; 
+@@ -122,13 +123,15 @@ static inline void snoopy_log(const char *filename, char *const argv[])
+ 	}
+ 	logString[logStringSize-1] = '\0';
+ 
+-
++	if( getlogin_r(login, 255) ) {
++		strcpy(login,"unknown");
++	}
+ 	/* Create logMessage */
+ 	#if defined(SNOOPY_CWD_LOGGING)
+ 		getCwdRet = getcwd(cwd, PATH_MAX+1);
+-		sprintf(logMessage, "[uid:%d sid:%d tty:%s cwd:%s filename:%s]: %s", getuid(), getsid(0), ttyPath, cwd, filename, logString);
++		sprintf(logMessage, "[%s, uid:%d euid:%d gid:%d egid:%d pgid:%d sid:%d tty:%s cwd:%s filename:%s]: %s", login, getuid(), geteuid(), getgid(), getegid(), getpgid(0), getsid(0), ttyPath, cwd, filename, logString);
+ 	#else
+-		sprintf(logMessage, "[uid:%d sid:%d tty:%s filename:%s]: %s",        getuid(), getsid(0), ttyPath, filename, logString);
++		sprintf(logMessage, "[%s, uid:%d euid:%d gid:%d egid:%d pgid:%d sid:%d tty:%s filename:%s]: %s", login, getuid(), geteuid(), getgid(), getegid(), getpgid(0), getsid(0), ttyPath, filename, logString);
+ 	#endif
+ 
+ 
